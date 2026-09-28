@@ -1,0 +1,5 @@
+node_modules
+dist
+.git
+.base44
+*.log
