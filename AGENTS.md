@@ -26,3 +26,19 @@ Front-end only for now; all content comes from mock data in `src/data/videos.js`
 - Vite must bind 0.0.0.0 and allow the preview host; both handled in `vite.config.js`
   (`host: true`, `allowedHosts: true`) plus `__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS`.
 - File-watch polling is enabled (bind mounts don't always emit inotify events).
+
+## Deployment
+There is no built-in publish flow — this is a static Vite SPA, deployed from Git.
+Configs are included for four targets:
+- **Docker / VPS:** `Dockerfile` (multi-stage: Vite build → nginx) + `nginx.conf`
+  (SPA fallback). `docker build -t mt-tub . && docker run -p 80:80 mt-tub`
+- **Vercel:** `vercel.json` — import the repo in Vercel (framework: vite, SPA rewrites).
+- **Netlify:** `netlify.toml` — import the repo in Netlify (build `npm run build`, publish `dist`).
+- **GitHub Pages:** `.github/workflows/deploy-pages.yml` — builds with
+  `VITE_BASE_PATH=/MT-TUB-/` and copies `index.html` → `404.html` for SPA routing.
+  Requires Settings → Pages → Source = "GitHub Actions".
+
+Subpath hosting works because `vite.config.js` reads `VITE_BASE_PATH` and
+`src/main.jsx` passes `import.meta.env.BASE_URL` to `BrowserRouter` as `basename`.
+Verified: `npm run build` (both default and `/MT-TUB-/` base) and the nginx image
+returns 200 for `/` and deep links like `/watch/v1`.
