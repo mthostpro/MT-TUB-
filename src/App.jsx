@@ -19,8 +19,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/watch/:id" element={<Watch />} />
             <Route path="/em-alta" element={<Home onlyTrending />} />
-            <Route path="/inscricoes" element={<Placeholder title="Inscrições" />} />
-            <Route path="/biblioteca" element={<Placeholder title="Biblioteca" />} />
+            <Route path="*" element={<Placeholder />} />
           </Routes>
         </main>
       </div>

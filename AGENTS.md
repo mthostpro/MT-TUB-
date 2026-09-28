@@ -17,8 +17,10 @@ Front-end only for now; all content comes from mock data in `src/data/videos.js`
 ## Structure
 - `src/pages/Home.jsx` — feed with category chips
 - `src/pages/Watch.jsx` — video page (`/watch/:id`)
-- `src/components/` — Header, Sidebar, VideoCard
+- `src/pages/Placeholder.jsx` — catch-all page for nav items not built yet
+- `src/components/` — Header, Sidebar, VideoCard, ChannelAvatar, VideoPlayer, Comments
 - `src/data/videos.js` — mock catalogue + channels (replace with a real API later)
+- UI is a YouTube-style dark theme (#0f0f0f background, #272727 surfaces, #ff0000 accent).
 
 ## Notes
 - Vite must bind 0.0.0.0 and allow the preview host; both handled in `vite.config.js`

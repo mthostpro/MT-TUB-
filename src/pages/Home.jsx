@@ -21,7 +21,7 @@ export default function Home({ onlyTrending = false }) {
             className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition ${
               active === c
                 ? 'bg-white text-black'
-                : 'bg-white/10 text-white hover:bg-white/20'
+                : 'bg-[#272727] text-white hover:bg-[#3f3f3f]'
             }`}
           >
             {c}
