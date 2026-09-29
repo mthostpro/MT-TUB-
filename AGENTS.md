@@ -29,7 +29,9 @@ Identity: dark cinematic theme (near-black `ink-*` surfaces), **red + gold** bra
   `buildEPG()`, `searchTitles()`, `byTag()`
 - `src/player/` — `VideoPlayer.jsx` (custom controls) + `useHls.js` (HLS adapter)
 - `src/components/` — `HeroBanner`, `ContentRow`, `ContentCard`, `ContinueCard`,
-  `Badges`, `Brand`, `Icons`, `Toasts`, `layout/TopNav`, `layout/SideRail`
+  `Badges`, `Brand`, `ChannelBanner`, `Icons`, `Toasts`, `layout/TopNav`, `layout/SideRail`
+- `src/assets/brand/` — MT TUB brand art (WebP, ~1200px wide). `Brand` renders the logo
+  in the header; `ChannelBanner` renders the masthead strip at the top of Home.
 - `src/pages/` — `Home`, `Browse`, `TitleDetail`, `Watch`, `Live`, `LiveChannel`,
   `Search`, `MyList`, `Plans`, `Kids`, `Profile`, `Placeholder`
 - `src/hooks/useClickOutside.js`

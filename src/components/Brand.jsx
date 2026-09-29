@@ -1,14 +1,15 @@
 import { Link } from 'react-router-dom'
+import logo from '../assets/brand/mt-tub-logo.webp'
 
-// MEGA STREAMING wordmark + play glyph.
+// MT TUB logo + MEGA STREAMING wordmark.
 export default function Brand({ compact = false, to = '/' }) {
   return (
     <Link to={to} className="flex items-center gap-2" aria-label="MEGA STREAMING — início">
-      <span className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-mega-red-bright to-mega-red-deep shadow-[0_0_18px_-2px_rgba(225,29,46,0.7)]">
-        <svg viewBox="0 0 24 24" className="h-4 w-4 fill-white">
-          <path d="M8 5v14l11-7z" />
-        </svg>
-      </span>
+      <img
+        src={logo}
+        alt="MT TUB"
+        className={`rounded-lg object-cover shadow-[0_0_18px_-4px_rgba(225,29,46,0.8)] ${compact ? 'h-8 w-8' : 'h-9 w-9'}`}
+      />
       {!compact && (
         <span className="brand-wordmark text-[22px] text-white">
           MEGA<span className="text-mega-red-bright"> STREAMING</span>

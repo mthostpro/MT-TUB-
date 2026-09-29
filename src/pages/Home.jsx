@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import ChannelBanner from '../components/ChannelBanner.jsx'
 import HeroBanner from '../components/HeroBanner.jsx'
 import ContentRow from '../components/ContentRow.jsx'
 import ContinueCard from '../components/ContinueCard.jsx'
@@ -26,6 +27,8 @@ export default function Home() {
 
   return (
     <div className="pb-16">
+      <ChannelBanner />
+
       <HeroBanner items={featured} />
 
       {continueItems.length > 0 && (
