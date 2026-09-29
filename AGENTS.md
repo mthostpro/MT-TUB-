@@ -1,44 +1,59 @@
 # AGENTS.md
 
 ## What this is
-MT-TUB — a YouTube-style video platform web app (React + Vite + Tailwind v4).
-Front-end only for now; all content comes from mock data in `src/data/videos.js`.
+**MEGA STREAMING** — a premium, cinematic video-streaming front end (React + Vite +
+Tailwind v4). Films, series, live TV, sports, kids and more. All content is mock data
+in `src/data/catalog.js`, shaped to mirror the planned API so a backend can replace it
+without touching the UI.
+
+Identity: dark cinematic theme (near-black `ink-*` surfaces), **red + gold** brand
+(`mega-red`, `mega-gold`), glassmorphism surfaces (`.glass`, `.glass-strong`).
 
 ## Running it (Base44 dev environment)
 - `docker compose -f docker-compose.base44.yml up -d --build`
 - Dev server listens on container port `5173`, mapped to host `3000`.
-- Source is bind-mounted; Vite hot-reloads on edits. No restart needed for frontend changes.
+- Source is bind-mounted; Vite hot-reloads on edits.
+- `hls.js` is a runtime dependency (HLS playback in Chrome/Firefox). After changing
+  `package.json`, restart the service so `npm install` re-runs: `docker compose restart web`.
 - No external services or credentials required.
 
 ## Verify it works
 - `docker compose -f docker-compose.base44.yml ps` → `web` healthy
-- `curl -s localhost:3000 | grep -i mt-tub` → returns the served HTML
+- `curl -s localhost:3000 | grep -i "MEGA STREAMING"` → served HTML
 
 ## Structure
-- `src/pages/Home.jsx` — feed with category chips
-- `src/pages/Watch.jsx` — video page (`/watch/:id`)
-- `src/pages/Placeholder.jsx` — catch-all page for nav items not built yet
-- `src/components/` — Header, Sidebar, VideoCard, ChannelAvatar, VideoPlayer, Comments
-- `src/data/videos.js` — mock catalogue + channels (replace with a real API later)
-- UI is a YouTube-style dark theme (#0f0f0f background, #272727 surfaces, #ff0000 accent).
+- `src/App.jsx` — routes + layout shell (TopNav, SideRail, Toasts)
+- `src/context/AppContext.jsx` — user state (my list, favorites, progress, history,
+  profile, kids mode, toasts), persisted to `localStorage` under `mega-streaming:v1`
+- `src/data/catalog.js` — `TITLES`, `LIVE_CHANNELS`, `PLANS`, `ROWS`, `NAV`, `RAIL`,
+  `buildEPG()`, `searchTitles()`, `byTag()`
+- `src/player/` — `VideoPlayer.jsx` (custom controls) + `useHls.js` (HLS adapter)
+- `src/components/` — `HeroBanner`, `ContentRow`, `ContentCard`, `ContinueCard`,
+  `Badges`, `Brand`, `Icons`, `Toasts`, `layout/TopNav`, `layout/SideRail`
+- `src/pages/` — `Home`, `Browse`, `TitleDetail`, `Watch`, `Live`, `LiveChannel`,
+  `Search`, `MyList`, `Plans`, `Kids`, `Profile`, `Placeholder`
+- `src/hooks/useClickOutside.js`
 
-## Notes
-- Vite must bind 0.0.0.0 and allow the preview host; both handled in `vite.config.js`
-  (`host: true`, `allowedHosts: true`) plus `__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS`.
-- File-watch polling is enabled (bind mounts don't always emit inotify events).
+### Routes
+`/` · `/filmes` `/series` `/documentarios` `/shows` `/musica` `/gospel` `/noticias`
+`/esportes` (via `<Browse kind=…/>`) · `/catalogo/:rowId` · `/infantil` · `/ao-vivo`
+`/canais` · `/ao-vivo/:id` · `/titulo/:id` · `/assistir/:id` · `/busca` · `/minha-lista`
+`/favoritos` · `/planos` · `/perfil` · `*` → Placeholder (roadmap: admin, auth, backend)
+
+## Player notes
+- `useHls` attaches the source: MP4 plays natively; `.m3u8` uses native HLS (Safari) or
+  `hls.js`. **DASH (.mpd) is reserved** for a dash.js adapter.
+- Subtitles are a generated WebVTT blob so the caption control is functional.
+  Do NOT add a cleanup that revokes the blob URL — React StrictMode double-invokes
+  effects and would revoke it before the track loads.
+- Do NOT set `crossOrigin` on the `<video>`: most sample video hosts (test-videos.co.uk,
+  media.w3.org) send no CORS headers and the video would fail to load.
+- Quality selector swaps between the `qualities[]` ladder entries, preserving position.
+- Content images come from `picsum.photos` (deterministic by seed) and are `loading="lazy"`;
+  only above-the-fold images load on first paint, which is expected.
 
 ## Deployment
-There is no built-in publish flow — this is a static Vite SPA, deployed from Git.
-Configs are included for four targets:
-- **Docker / VPS:** `Dockerfile` (multi-stage: Vite build → nginx) + `nginx.conf`
-  (SPA fallback). `docker build -t mt-tub . && docker run -p 80:80 mt-tub`
-- **Vercel:** `vercel.json` — import the repo in Vercel (framework: vite, SPA rewrites).
-- **Netlify:** `netlify.toml` — import the repo in Netlify (build `npm run build`, publish `dist`).
-- **GitHub Pages:** `.github/workflows/deploy-pages.yml` — builds with
-  `VITE_BASE_PATH=/MT-TUB-/` and copies `index.html` → `404.html` for SPA routing.
-  Requires Settings → Pages → Source = "GitHub Actions".
-
-Subpath hosting works because `vite.config.js` reads `VITE_BASE_PATH` and
-`src/main.jsx` passes `import.meta.env.BASE_URL` to `BrowserRouter` as `basename`.
-Verified: `npm run build` (both default and `/MT-TUB-/` base) and the nginx image
-returns 200 for `/` and deep links like `/watch/v1`.
+No built-in publish flow — a static Vite SPA deployed from Git. Configs included for
+Docker/VPS (`Dockerfile` + `nginx.conf`), Vercel (`vercel.json`), Netlify (`netlify.toml`)
+and GitHub Pages (`.github/workflows/deploy-pages.yml`). Subpath hosting works via
+`VITE_BASE_PATH` + `BrowserRouter basename`.

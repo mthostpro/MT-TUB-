@@ -1,144 +1,208 @@
-import { Link, useParams } from 'react-router-dom'
-import { channels, getVideo, videos } from '../data/videos.js'
-import ChannelAvatar from '../components/ChannelAvatar.jsx'
-import VideoPlayer from '../components/VideoPlayer.jsx'
-import Comments from '../components/Comments.jsx'
-
-function Pill({ icon, label }) {
-  return (
-    <button className="flex items-center gap-2 whitespace-nowrap rounded-full bg-[#272727] px-4 py-2 text-sm font-medium hover:bg-[#3f3f3f]">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <path d={icon} />
-      </svg>
-      {label}
-    </button>
-  )
-}
+import { useMemo, useState } from 'react'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import VideoPlayer from '../player/VideoPlayer.jsx'
+import Icon, { paths } from '../components/Icons.jsx'
+import { AgeRating, Pill } from '../components/Badges.jsx'
+import ContentRow from '../components/ContentRow.jsx'
+import { getTitle, imageFor, TITLES } from '../data/catalog.js'
+import { useApp } from '../context/AppContext.jsx'
 
 export default function Watch() {
   const { id } = useParams()
-  const video = getVideo(id)
+  const [params] = useSearchParams()
+  const navigate = useNavigate()
+  const item = getTitle(id)
+  const { isInList, isFavorite, toggleList, toggleFavorite, saveProgress, progressOf, notify } = useApp()
+  const [cinema, setCinema] = useState(false)
 
-  if (!video) {
+  const sNum = Number(params.get('s')) || 1
+  const eNum = Number(params.get('e')) || 1
+
+  const { season, episode, qualities, nextEpisode } = useMemo(() => {
+    if (!item) return {}
+    if (item.type !== 'series') {
+      return { qualities: item.qualities, episode: null, season: null, nextEpisode: null }
+    }
+    const season = item.seasons.find((x) => x.number === sNum) || item.seasons[0]
+    const idx = season.episodes.findIndex((x) => x.number === eNum)
+    const episode = season.episodes[idx >= 0 ? idx : 0]
+    const nextEpisode = season.episodes[idx + 1] || null
+    return { season, episode, qualities: episode.qualities, nextEpisode }
+  }, [item, sNum, eNum])
+
+  const similar = useMemo(
+    () => TITLES.filter((t) => t.id !== id && item && t.genres.some((g) => item.genres.includes(g))).slice(0, 12),
+    [id, item],
+  )
+
+  if (!item) {
     return (
-      <div className="p-10 text-center text-white/70">
-        Vídeo não encontrado.{' '}
-        <Link to="/" className="text-sky-400 underline">
-          Voltar ao início
-        </Link>
+      <div className="flex flex-col items-center gap-3 py-24 text-center">
+        <p className="text-lg font-semibold">Conteúdo não encontrado</p>
+        <Link to="/" className="text-sm text-mega-red-bright underline">Voltar ao início</Link>
       </div>
     )
   }
 
-  const ch = channels[video.channel]
-  const related = videos.filter((v) => v.id !== video.id)
+  const listed = isInList(item.id)
+  const fav = isFavorite(item.id)
+  const progress = progressOf(item.id)
+  const displayTitle = episode ? `${item.title} — T${season.number}E${episode.number} · ${episode.title}` : item.title
+  const subtitle = episode ? `${item.title} · Temporada ${season.number} · Episódio ${episode.number}` : null
+
+  function goNext() {
+    if (!nextEpisode) return
+    navigate(`/assistir/${item.id}?s=${season.number}&e=${nextEpisode.number}`)
+  }
+
+  function handleProgress(data) {
+    if (data.notice) { notify(data.notice); return }
+    saveProgress(item.id, {
+      position: data.position,
+      duration: data.duration,
+      percent: data.percent,
+      episode: episode ? { season: season.number, number: episode.number, title: episode.title } : null,
+    })
+  }
 
   return (
-    <div className="mx-auto flex max-w-[1750px] flex-col gap-6 p-4 lg:flex-row">
-      <div className="min-w-0 flex-1">
-        <VideoPlayer video={video} />
+    <div className="pb-16">
+      <div className={`mx-auto w-full ${cinema ? 'max-w-none' : 'max-w-[1400px]'} px-0 lg:px-6 lg:pt-4`}>
+        <VideoPlayer
+          item={item}
+          src={qualities?.[0]?.url}
+          qualities={qualities || []}
+          poster={imageFor(`${item.id}-bd`, 1280, 720)}
+          title={displayTitle}
+          subtitle={subtitle}
+          hasNext={!!nextEpisode}
+          onNext={goNext}
+          onProgress={handleProgress}
+          startAt={progress?.position || 0}
+          cinema={cinema}
+          onToggleCinema={() => setCinema((c) => !c)}
+        />
 
-        <h1 className="mt-3 text-xl font-semibold leading-snug">{video.title}</h1>
+        <div className="flex flex-col gap-8 px-4 pt-6 lg:flex-row lg:px-0">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h1 className="text-xl font-bold leading-snug lg:text-2xl">{displayTitle}</h1>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-white/65">
+                  <span className="flex items-center gap-1 font-semibold text-mega-gold">
+                    <Icon path={paths.star} fill className="h-4 w-4" /> {item.score}
+                  </span>
+                  <span>{item.year}</span>
+                  <AgeRating value={item.rating} />
+                  <span>{item.genres.join(' • ')}</span>
+                  <Pill tone="outline">{item.free ? 'Gratuito' : 'Premium'}</Pill>
+                </div>
+              </div>
+            </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <ChannelAvatar channel={video.channel} size="lg" />
-          <div className="mr-1">
-            <p className="text-base font-medium">{ch.name}</p>
-            <p className="text-xs text-white/60">1,2 mi de inscritos</p>
-          </div>
-          <button className="whitespace-nowrap rounded-full bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90">
-            Inscrever-se
-          </button>
-
-          <div className="ml-auto flex flex-wrap items-center gap-2">
-            <div className="flex items-center rounded-full bg-[#272727]">
-              <button className="flex items-center gap-2 whitespace-nowrap rounded-l-full py-2 pl-4 pr-3 text-sm font-medium hover:bg-[#3f3f3f]">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5"
-                >
-                  <path d="M7 11v10H4v-9a1 1 0 011-1h2zm0 0l4.5-8a2 2 0 012.9 2.3L13 9h5.5a2 2 0 011.9 2.6l-2 6A2 2 0 0116.5 19H7" />
-                </svg>
-                12 mil
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => toggleList(item.id, item.title)}
+                className="glass flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition hover:bg-white/15"
+              >
+                <Icon path={listed ? paths.check : paths.plus} className="h-4 w-4" /> {listed ? 'Na Minha Lista' : 'Minha Lista'}
               </button>
-              <span className="h-6 w-px bg-white/20" />
-              <button className="rounded-r-full py-2 pl-3 pr-4 hover:bg-[#3f3f3f]">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5 rotate-180"
-                >
-                  <path d="M7 11v10H4v-9a1 1 0 011-1h2zm0 0l4.5-8a2 2 0 012.9 2.3L13 9h5.5a2 2 0 011.9 2.6l-2 6A2 2 0 0116.5 19H7" />
-                </svg>
+              <button
+                onClick={() => toggleFavorite(item.id, item.title)}
+                className={`glass flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition hover:bg-white/15 ${fav ? 'text-mega-red-bright' : ''}`}
+              >
+                <Icon path={paths.heart} fill={fav} className="h-4 w-4" /> Favoritar
+              </button>
+              <button onClick={() => notify('Link copiado para compartilhar')} className="glass flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition hover:bg-white/15">
+                <Icon path={paths.share} className="h-4 w-4" /> Compartilhar
+              </button>
+              <button onClick={() => notify('Download disponível nos planos Premium e Ultra')} className="glass flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition hover:bg-white/15">
+                <Icon path={paths.download} className="h-4 w-4" /> Baixar
               </button>
             </div>
-            <Pill icon="M4 12v7a1 1 0 001 1h12.5a2 2 0 001.9-1.4l2-6A2 2 0 0019.5 10H14l1.4-4.7A2 2 0 0012.5 3L8 11" label="Compartilhar" />
-            <Pill icon="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" label="Baixar" />
+
+            <p className="mt-5 max-w-3xl text-sm leading-relaxed text-white/70">
+              {episode ? episode.synopsis : item.synopsis}
+            </p>
+
+            {nextEpisode && (
+              <button
+                onClick={goNext}
+                className="glass mt-6 flex w-full max-w-2xl items-center gap-4 rounded-2xl p-3 text-left transition hover:bg-white/10"
+              >
+                <img src={imageFor(`${item.id}-s${season.number}e${nextEpisode.number}`, 320, 180)} alt="" className="aspect-video w-32 shrink-0 rounded-xl object-cover" />
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-mega-red-bright">A seguir</p>
+                  <p className="truncate text-sm font-semibold">T{season.number}E{nextEpisode.number} · {nextEpisode.title}</p>
+                  <p className="mt-0.5 line-clamp-2 text-xs text-white/55">{nextEpisode.synopsis}</p>
+                </div>
+                <Icon path={paths.next} fill className="ml-auto h-6 w-6 shrink-0 text-white/70" />
+              </button>
+            )}
           </div>
-        </div>
 
-        <div className="mt-4 rounded-xl bg-[#272727] p-3 text-sm">
-          <p className="font-medium">
-            {video.views} • {video.uploaded}
-          </p>
-          <p className="mt-1 whitespace-pre-line">{video.description}</p>
-          <button className="mt-2 font-medium text-white/80 hover:text-white">
-            ...mostrar mais
-          </button>
-        </div>
+          {/* episode list / side panel */}
+          <aside className="w-full shrink-0 lg:w-[360px]">
+            {item.type === 'series' && season && (
+              <>
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="font-bold">Temporada {season.number}</h2>
+                  <div className="relative">
+                    <select
+                      value={season.number}
+                      onChange={(e) => navigate(`/assistir/${item.id}?s=${e.target.value}&e=1`)}
+                      aria-label="Escolher temporada"
+                      className="appearance-none rounded-full border border-white/10 bg-white/5 py-1.5 pl-3 pr-8 text-xs outline-none"
+                    >
+                      {item.seasons.map((s) => <option key={s.number} value={s.number} className="bg-ink-800">Temporada {s.number}</option>)}
+                    </select>
+                    <Icon path={paths.chevronDown} className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/50" />
+                  </div>
+                </div>
+                <div className="no-scrollbar flex max-h-[520px] flex-col gap-1 overflow-y-auto pr-1">
+                  {season.episodes.map((ep) => {
+                    const active = ep.number === episode.number
+                    return (
+                      <button
+                        key={ep.number}
+                        onClick={() => navigate(`/assistir/${item.id}?s=${season.number}&e=${ep.number}`)}
+                        className={`flex items-center gap-3 rounded-xl p-2 text-left transition ${active ? 'bg-mega-red/15 ring-1 ring-mega-red/40' : 'hover:bg-white/5'}`}
+                      >
+                        <img src={imageFor(`${item.id}-s${season.number}e${ep.number}`, 240, 135)} alt="" loading="lazy" className="aspect-video w-24 shrink-0 rounded-lg object-cover" />
+                        <div className="min-w-0">
+                          <p className={`truncate text-sm font-medium ${active ? 'text-mega-red-bright' : ''}`}>{ep.number}. {ep.title}</p>
+                          <p className="text-xs text-white/50">{ep.duration} min</p>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </>
+            )}
 
-        <Comments />
+            {item.type !== 'series' && (
+              <>
+                <h2 className="mb-3 font-bold">Recomendados para você</h2>
+                <div className="flex flex-col gap-3">
+                  {similar.slice(0, 6).map((t) => (
+                    <Link key={t.id} to={`/titulo/${t.id}`} className="group flex gap-3">
+                      <img src={imageFor(`${t.id}-bd`, 320, 180)} alt="" loading="lazy" className="aspect-video w-32 shrink-0 rounded-xl object-cover ring-1 ring-white/5" />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium group-hover:text-mega-red-bright">{t.title}</p>
+                        <p className="text-xs text-white/50">{t.year} • {t.genres[0]}</p>
+                        <p className="mt-0.5 flex items-center gap-1 text-xs text-mega-gold"><Icon path={paths.star} fill className="h-3 w-3" />{t.score}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </aside>
+        </div>
       </div>
 
-      <div className="w-full shrink-0 lg:w-[402px]">
-        <h2 className="mb-3 text-base font-semibold">A seguir</h2>
-        <div className="flex flex-col gap-3">
-          {related.map((v) => (
-            <Link
-              key={v.id}
-              to={`/watch/${v.id}`}
-              className="group flex gap-3"
-            >
-              <div
-                className={`relative aspect-video w-40 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br ${v.gradient}`}
-              >
-                <span
-                  className={`absolute bottom-1 right-1 rounded px-1 py-0.5 text-[10px] font-medium ${
-                    v.live ? 'bg-[#ff0000] text-white' : 'bg-black/80 text-white'
-                  }`}
-                >
-                  {v.duration}
-                </span>
-              </div>
-              <div className="min-w-0">
-                <h3 className="line-clamp-2 text-sm font-medium leading-snug">
-                  {v.title}
-                </h3>
-                <p className="mt-1 text-xs text-white/60">{channels[v.channel].name}</p>
-                <p className="text-xs text-white/60">
-                  {v.views} • {v.uploaded}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+      <div className="mt-10">
+        <ContentRow title="Você também pode gostar" items={similar} />
       </div>
     </div>
   )

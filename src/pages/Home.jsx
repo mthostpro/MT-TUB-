@@ -1,37 +1,53 @@
-import { useState } from 'react'
-import VideoCard from '../components/VideoCard.jsx'
-import { videos, categories } from '../data/videos.js'
+import { useMemo } from 'react'
+import HeroBanner from '../components/HeroBanner.jsx'
+import ContentRow from '../components/ContentRow.jsx'
+import ContinueCard from '../components/ContinueCard.jsx'
+import Kids from './Kids.jsx'
+import { byTag, getTitle, ROWS } from '../data/catalog.js'
+import { useApp } from '../context/AppContext.jsx'
 
-export default function Home({ onlyTrending = false }) {
-  const [active, setActive] = useState('Todos')
+const CONTINUE_LABEL = 'Continue assistindo'
 
-  const list = onlyTrending
-    ? videos.filter((v) => v.live || v.views.includes('mi'))
-    : active === 'Todos'
-      ? videos
-      : videos.filter((v) => v.category === active)
+export default function Home() {
+  const { kidsMode, history, progress } = useApp()
+
+  const featured = useMemo(() => byTag('destaque').slice(0, 5), [])
+
+  const continueItems = useMemo(() => {
+    const ids = history.length ? history : Object.keys(progress)
+    return ids
+      .map(getTitle)
+      .filter(Boolean)
+      .filter((t) => progress[t.id]?.percent > 1 && progress[t.id]?.percent < 97)
+      .slice(0, 12)
+  }, [history, progress])
+
+  if (kidsMode) return <Kids />
 
   return (
-    <div className="pb-10">
-      <div className="sticky top-0 z-20 flex gap-3 overflow-x-auto bg-[#0f0f0f] px-4 py-3">
-        {categories.map((c) => (
-          <button
-            key={c}
-            onClick={() => setActive(c)}
-            className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-              active === c
-                ? 'bg-white text-black'
-                : 'bg-[#272727] text-white hover:bg-[#3f3f3f]'
-            }`}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
+    <div className="pb-16">
+      <HeroBanner items={featured} />
 
-      <div className="grid grid-cols-1 gap-x-4 gap-y-8 px-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {list.map((v) => (
-          <VideoCard key={v.id} video={v} />
+      {continueItems.length > 0 && (
+        <section className="px-4 pt-8 lg:px-6">
+          <h2 className="mb-3 text-lg font-bold tracking-tight lg:text-xl">{CONTINUE_LABEL}</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {continueItems.map((t) => (
+              <ContinueCard key={t.id} item={t} progress={progress[t.id]} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <div className="mt-2">
+        {ROWS.map((row) => (
+          <ContentRow
+            key={row.id}
+            title={row.label}
+            items={byTag(row.id)}
+            seeAllTo={`/catalogo/${row.id}`}
+            showProgress={row.id === 'mais-assistidos'}
+          />
         ))}
       </div>
     </div>
