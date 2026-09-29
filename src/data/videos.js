@@ -1,4 +1,5 @@
 // Mock catalogue for MT-TUB. Swap for a real API later.
+// Video sources use free, publicly available sample videos.
 
 export const categories = [
   'Todos',
@@ -31,6 +32,7 @@ export const videos = [
     duration: '24:11',
     category: 'Programação',
     gradient: 'from-emerald-500 to-teal-700',
+    videoUrl: 'https://vjs.zencdn.net/v/oceans.mp4',
     description:
       'Neste episódio começamos o front-end do projeto: layout, roteamento e o primeiro componente de player. Código-fonte na descrição.',
   },
@@ -43,6 +45,7 @@ export const videos = [
     duration: '1:02:45',
     category: 'Música',
     gradient: 'from-indigo-500 to-purple-800',
+    videoUrl: 'https://test-videos.co.uk/vids/jellyfish/mp4/h264/360/Jellyfish_360_10s_1MB.mp4',
     description:
       'Uma hora de beats calmos para focar. Sem interrupções, sem anúncios no meio.',
   },
@@ -55,6 +58,7 @@ export const videos = [
     duration: '18:39',
     category: 'Jogos',
     gradient: 'from-rose-500 to-orange-600',
+    videoUrl: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4',
     description:
       'Run completa, comentada, com os melhores momentos e as piores mortes que ficaram de fora.',
   },
@@ -68,6 +72,7 @@ export const videos = [
     category: 'Ao vivo',
     live: true,
     gradient: 'from-amber-500 to-red-700',
+    videoUrl: 'https://media.w3.org/2010/05/bunny/trailer.mp4',
     description:
       'Cobertura ao vivo dos principais lançamentos da semana em tecnologia e IA.',
   },
@@ -80,6 +85,7 @@ export const videos = [
     duration: '31:02',
     category: 'Programação',
     gradient: 'from-sky-500 to-blue-800',
+    videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
     description:
       'Como organizamos um monólito que cresceu demais: camadas, contratos e testes.',
   },
@@ -92,6 +98,7 @@ export const videos = [
     duration: '47:20',
     category: 'Música',
     gradient: 'from-fuchsia-500 to-pink-700',
+    videoUrl: 'https://media.w3.org/2010/05/bunny/movie.mp4',
     description:
       'Seleção das faixas mais tocadas, atualizada toda semana.',
   },
@@ -104,6 +111,7 @@ export const videos = [
     duration: '20:14',
     category: 'Programação',
     gradient: 'from-teal-500 to-cyan-800',
+    videoUrl: 'https://test-videos.co.uk/vids/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4',
     description:
       'Pipelines, testes automáticos e deploy contínuo sem complicação.',
   },
@@ -116,6 +124,7 @@ export const videos = [
     duration: '12:58',
     category: 'Jogos',
     gradient: 'from-red-500 to-rose-800',
+    videoUrl: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4',
     description:
       'O recorde caiu de novo. Veja o momento exato e a reação do corredor.',
   },
