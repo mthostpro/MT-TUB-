@@ -15,7 +15,9 @@ Identity: dark cinematic theme (near-black `ink-*` surfaces), **red + gold** bra
 - Source is bind-mounted; Vite hot-reloads on edits.
 - `hls.js` is a runtime dependency (HLS playback in Chrome/Firefox). After changing
   `package.json`, restart the service so `npm install` re-runs: `docker compose restart web`.
-- No external services or credentials required.
+- Two services: `web` (Vite, host 3000) and `api` (publishing API, host 8000).
+  Vite proxies `/api` → `http://api:8000`, so the app stays single-origin.
+- Slack credentials are optional — the app boots and publishes without them.
 
 ## Verify it works
 - `docker compose -f docker-compose.base44.yml ps` → `web` healthy
@@ -33,14 +35,16 @@ Identity: dark cinematic theme (near-black `ink-*` surfaces), **red + gold** bra
 - `src/assets/brand/` — MT TUB brand art (WebP, ~1200px wide). `Brand` renders the logo
   in the header; `ChannelBanner` renders the masthead strip at the top of Home.
 - `src/pages/` — `Home`, `Browse`, `TitleDetail`, `Watch`, `Live`, `LiveChannel`,
-  `Search`, `MyList`, `Plans`, `Kids`, `Profile`, `Placeholder`
+  `Search`, `MyList`, `Plans`, `Kids`, `Profile`, `Admin`, `Placeholder`
 - `src/hooks/useClickOutside.js`
+- `src/lib/api.js` — client for the publishing API (`/api`, proxied by Vite)
+- `server/` — publishing API: `index.js` (routes), `slack.js` (delivery), `store.js` (JSON store)
 
 ### Routes
 `/` · `/filmes` `/series` `/documentarios` `/shows` `/musica` `/gospel` `/noticias`
 `/esportes` (via `<Browse kind=…/>`) · `/catalogo/:rowId` · `/infantil` · `/ao-vivo`
 `/canais` · `/ao-vivo/:id` · `/titulo/:id` · `/assistir/:id` · `/busca` · `/minha-lista`
-`/favoritos` · `/planos` · `/perfil` · `*` → Placeholder (roadmap: admin, auth, backend)
+`/favoritos` · `/planos` · `/perfil` · `/admin` · `*` → Placeholder (roadmap: auth, backend)
 
 ## Player notes
 - `useHls` attaches the source: MP4 plays natively; `.m3u8` uses native HLS (Safari) or
@@ -53,6 +57,28 @@ Identity: dark cinematic theme (near-black `ink-*` surfaces), **red + gold** bra
 - Quality selector swaps between the `qualities[]` ladder entries, preserving position.
 - Content images come from `picsum.photos` (deterministic by seed) and are `loading="lazy"`;
   only above-the-fold images load on first paint, which is expected.
+
+## Publishing + Slack notifications
+`server/` is a dependency-free Node service (plain `node:http`, no npm install).
+- `GET /api/videos` — published videos (also what the Compose healthcheck probes)
+- `POST /api/videos` — publish: stores the video, then notifies Slack
+- `GET /api/slack` — which Slack transports are configured
+
+Published videos live in the `api-data` volume (`/data/videos.json`), never in the repo.
+They join the catalogue at runtime through `registerPublished()` in `src/data/catalog.js`
+and show up in the "Novidades na plataforma" row on Home and at `/titulo/:id`.
+
+Slack transports come from the environment and **every** configured one receives the
+message (see `server/slack.js`): `SLACK_WEBHOOK_URL` (Incoming Webhook),
+`SLACK_WORKFLOW_WEBHOOK_URL` (Workflow trigger), `SLACK_BOT_TOKEN` + `SLACK_CHANNEL`
+(`chat.postMessage`). They arrive via `env_file: /run/base44/app.env`. A Slack failure
+never blocks publishing — it is reported in the response instead.
+
+Verify delivery without a real workspace: start a throwaway node container on the compose
+network that logs POST bodies, then
+`docker compose -f docker-compose.base44.yml exec -T -e SLACK_WEBHOOK_URL=http://<mock>:9099/hook api node -e "…"`
+calling `notifyNewVideo`. External systems publish by POSTing JSON to
+`https://8000-<public host>/api/videos` (no auth in dev).
 
 ## Deployment
 No built-in publish flow — a static Vite SPA deployed from Git. Configs included for

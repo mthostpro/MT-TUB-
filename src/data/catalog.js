@@ -45,6 +45,7 @@ const img = (seed, w, h) => `https://picsum.photos/seed/${seed}/${w}/${h}`
 // Rows / categories shown on the home feed
 // ---------------------------------------------------------------------------
 export const ROWS = [
+  { id: 'novidades', label: 'Novidades na plataforma' },
   { id: 'destaque', label: 'Em Destaque' },
   { id: 'lancamentos', label: 'Lançamentos' },
   { id: 'mais-assistidos', label: 'Mais Assistidos' },
@@ -450,14 +451,34 @@ export const PLANS = [
 ]
 
 // ---------------------------------------------------------------------------
+// Runtime overlay — videos published through the publishing API (see server/)
+// join the catalogue without touching the static data above. `registerPublished`
+// fills in the playback defaults the static titles carry.
+// ---------------------------------------------------------------------------
+let publishedTitles = []
+
+export function registerPublished(videos = []) {
+  publishedTitles = videos.map((v) => ({
+    ...v,
+    tags: ['novidades', ...(v.tags || [])],
+    cast: v.cast || [],
+    duration: v.duration || 0,
+    qualities: v.qualities?.length ? v.qualities : Q.oceans,
+    trailer: v.trailer || TRAILER,
+  }))
+  return publishedTitles
+}
+
+// ---------------------------------------------------------------------------
 // Lookups
 // ---------------------------------------------------------------------------
-export const getTitle = (id) => TITLES.find((t) => t.id === id)
+export const getTitle = (id) => TITLES.find((t) => t.id === id) ?? publishedTitles.find((t) => t.id === id)
 export const getChannel = (id) => LIVE_CHANNELS.find((c) => c.id === id)
 
 export function byTag(tag, limit) {
   const list = TITLES.filter((t) => t.tags.includes(tag))
-  return limit ? list.slice(0, limit) : list
+  const all = tag === 'novidades' ? [...publishedTitles, ...list] : list
+  return limit ? all.slice(0, limit) : all
 }
 
 export function searchTitles(query, limit = 20) {

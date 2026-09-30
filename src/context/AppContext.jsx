@@ -1,4 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { listPublishedVideos } from '../lib/api.js'
+import { registerPublished } from '../data/catalog.js'
 
 // ---------------------------------------------------------------------------
 // App-wide user state: my list, favorites, watch progress, history, profile,
@@ -42,7 +44,17 @@ function load() {
 export function AppProvider({ children }) {
   const [state, setState] = useState(load)
   const [toasts, setToasts] = useState([])
+  const [published, setPublished] = useState([])
   const toastId = useRef(0)
+
+  // Videos published through the API join the catalogue at runtime.
+  useEffect(() => {
+    let alive = true
+    listPublishedVideos()
+      .then((videos) => { if (alive) setPublished(registerPublished(videos)) })
+      .catch(() => { /* API indisponível — segue com o catálogo estático */ })
+    return () => { alive = false }
+  }, [])
 
   useEffect(() => {
     try {
@@ -102,6 +114,7 @@ export function AppProvider({ children }) {
   const value = useMemo(() => ({
     ...state,
     toasts,
+    published,
     notify,
     toggleList,
     toggleFavorite,
@@ -113,7 +126,7 @@ export function AppProvider({ children }) {
     isInList: (id) => state.myList.includes(id),
     isFavorite: (id) => state.favorites.includes(id),
     progressOf: (id) => state.progress[id] || null,
-  }), [state, toasts, notify, toggleList, toggleFavorite, saveProgress, clearHistory, setKidsMode, setActiveProfile, updateProfile])
+  }), [state, toasts, published, notify, toggleList, toggleFavorite, saveProgress, clearHistory, setKidsMode, setActiveProfile, updateProfile])
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }

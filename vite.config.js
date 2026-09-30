@@ -12,5 +12,12 @@ export default defineConfig({
     strictPort: true,
     allowedHosts: true,
     watch: { usePolling: true },
+    // The app stays single-origin: /api is proxied to the publishing service.
+    proxy: {
+      '/api': {
+        target: process.env.API_URL || 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
   },
 })

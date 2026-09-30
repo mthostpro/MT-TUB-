@@ -1,6 +1,35 @@
 # Base44 dev environment — runs the app FROM SOURCE with live reload.
 # Do not replace with the project's own production compose/Dockerfile.
 services:
+  # Publishing API: stores new videos and notifies Slack (see server/).
+  # No dependencies — plain Node http server.
+  api:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    command: node --watch server/index.js
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - api-data:/data
+    environment:
+      - DATA_FILE=/data/videos.json
+      - PUBLIC_APP_URL=https://3000-${BASE44_PUBLIC_HOST_SUFFIX}
+    # Platform-managed secrets (Slack URLs / tokens). Last so it always wins.
+    env_file:
+      - /run/base44/app.env
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:8000/api/videos').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: on-failure
+
   web:
     image: node:22-bookworm-slim
     working_dir: /app
@@ -14,6 +43,11 @@ services:
       - CI=true
       # Vite >= 6.1 appends this to allowedHosts (sandbox host rotates).
       - __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=${BASE44_SANDBOX_HOST_DOMAIN}
+      # Vite proxies /api here, so the app stays single-origin.
+      - API_URL=http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
     healthcheck:
       test:
         - CMD
@@ -25,3 +59,6 @@ services:
       retries: 5
       start_period: 45s
     restart: on-failure
+
+volumes:
+  api-data:

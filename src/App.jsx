@@ -14,6 +14,7 @@ import MyList from './pages/MyList.jsx'
 import Plans from './pages/Plans.jsx'
 import Kids from './pages/Kids.jsx'
 import Profile from './pages/Profile.jsx'
+import Admin from './pages/Admin.jsx'
 import Placeholder from './pages/Placeholder.jsx'
 
 export default function App() {
@@ -52,6 +53,8 @@ export default function App() {
 
               <Route path="/planos" element={<Plans />} />
               <Route path="/perfil" element={<Profile />} />
+
+              <Route path="/admin" element={<Admin />} />
 
               <Route path="*" element={<Placeholder />} />
             </Routes>
