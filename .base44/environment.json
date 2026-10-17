@@ -1,0 +1,27 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "SLACK_WEBHOOK_URL",
+      "description": "Incoming Webhook URL do canal do Slack (api.slack.com/apps → Incoming Webhooks).",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "SLACK_WORKFLOW_WEBHOOK_URL",
+      "description": "URL de gatilho de um Workflow do Slack (Workflow Builder → Webhook trigger).",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "SLACK_BOT_TOKEN",
+      "description": "Bot token (xoxb-...) com o escopo chat:write, para publicar via chat.postMessage.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "SLACK_CHANNEL",
+      "description": "Canal usado com SLACK_BOT_TOKEN, por exemplo #geral ou C0123456789.",
+      "requiredAtBoot": false
+    }
+  ]
+}

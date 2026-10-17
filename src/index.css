@@ -1,0 +1,198 @@
+@import "tailwindcss";
+
+@theme {
+  /* Ink — cinematic near-black surfaces */
+  --color-ink-950: #060608;
+  --color-ink-900: #0a0a0e;
+  --color-ink-850: #101016;
+  --color-ink-800: #17171f;
+  --color-ink-700: #23232d;
+  --color-ink-600: #33333f;
+
+  /* Brand — cinematic red + gold */
+  --color-mega-red: #e11d2e;
+  --color-mega-red-bright: #ff2f42;
+  --color-mega-red-deep: #7d0c18;
+  --color-mega-gold: #f2b544;
+
+  --font-display: "Bebas Neue", "Arial Narrow", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink-950);
+  color: #f4f4f6;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Scrollbars ---------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2c2c36 transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #2c2c36;
+  border-radius: 9999px;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- Glass surfaces ---------- */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+.glass-strong {
+  background: rgba(16, 16, 22, 0.72);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ---------- Brand text ---------- */
+.brand-wordmark {
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+/* ---------- Animations ---------- */
+@keyframes kenburns {
+  0% {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.14) translate3d(-1.5%, -1.5%, 0);
+  }
+}
+.animate-kenburns {
+  animation: kenburns 22s ease-in-out infinite alternate;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-up {
+  animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease both;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(90deg, #14141b 0%, #1e1e28 40%, #14141b 80%);
+  background-size: 800px 100%;
+  animation: shimmer 1.5s linear infinite;
+}
+
+@keyframes livePulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(225, 29, 46, 0.6);
+  }
+  50% {
+    opacity: 0.85;
+    box-shadow: 0 0 0 6px rgba(225, 29, 46, 0);
+  }
+}
+.animate-live {
+  animation: livePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes floatUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-float-up {
+  animation: floatUp 0.3s ease both;
+}
+
+/* ---------- Range input (player) ---------- */
+input[type="range"].player-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"].player-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 14px;
+  width: 14px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 2px solid var(--color-mega-red);
+  margin-top: -5px;
+  transition: transform 0.15s ease;
+}
+input[type="range"].player-range:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+input[type="range"].player-range::-moz-range-thumb {
+  height: 14px;
+  width: 14px;
+  border: 2px solid var(--color-mega-red);
+  border-radius: 9999px;
+  background: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-kenburns,
+  .animate-fade-up,
+  .animate-live,
+  .skeleton {
+    animation: none;
+  }
+}
