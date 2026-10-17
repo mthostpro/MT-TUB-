@@ -10,8 +10,10 @@
 // publicly available sample streams.
 // ============================================================================
 
-const V = 'https://test-videos.co.uk/vids'
 const W3 = 'https://media.w3.org/2010/05'
+// Real, full-length films — Blender open movies and a public-domain feature
+// from the Internet Archive. No short test clips.
+const A = 'https://archive.org/download'
 
 export const HLS_STREAM = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
 
@@ -19,21 +21,23 @@ export const HLS_STREAM = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
 const q = (o) => Object.entries(o).map(([label, url]) => ({ label, url }))
 
 const Q = {
+  // Big Buck Bunny — 9:56
   bbb: q({
-    '1080p': `${V}/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_2MB.mp4`,
-    '720p': `${V}/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_2MB.mp4`,
-    '360p': `${V}/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_2MB.mp4`,
+    '720p': `${A}/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4`,
   }),
-  jelly: q({
-    '720p': `${V}/jellyfish/mp4/h264/720/Jellyfish_720_10s_2MB.mp4`,
-    '360p': `${V}/jellyfish/mp4/h264/360/Jellyfish_360_10s_1MB.mp4`,
+  // Elephants Dream — 10:53
+  elephants: q({
+    '720p': `${A}/ElephantsDream/ed_hd.mp4`,
+    '480p': `${A}/ElephantsDream/ed_1024_512kb.mp4`,
   }),
+  // Sintel — 14:48
   sintel: q({
-    '720p': `${V}/sintel/mp4/h264/720/Sintel_720_10s_2MB.mp4`,
-    '360p': `${V}/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4`,
+    '1080p': `${A}/Sintel/sintel-2048-surround.mp4`,
   }),
-  oceans: q({ '1080p': 'https://vjs.zencdn.net/v/oceans.mp4' }),
-  bunny: q({ '720p': `${W3}/bunny/movie.mp4`, '480p': `${W3}/bunny/trailer.mp4` }),
+  // The General (1926) — 1:19:46
+  general: q({
+    '1080p': `${A}/the-general-1926-by-buster-keaton/The.General.1926.1080p.BluRay.x264.AAC5.1-%5BYTS.MX%5D.mp4`,
+  }),
   hls: q({ 'Adaptativo (HLS)': HLS_STREAM }),
 }
 
@@ -127,7 +131,7 @@ export const TITLES = [
     free: false,
     synopsis: 'A última piloto da Terra precisa atravessar uma tempestade orbital para salvar a colônia que a exilou.',
     cast: ['Luísa Ferraz', 'Caio Muniz', 'Nina Rocha'],
-    director: 'Bruno Tavares', qualities: Q.oceans, trailer: TRAILER,
+    director: 'Bruno Tavares', qualities: Q.sintel, trailer: TRAILER,
   },
   {
     id: 'o-ultimo-horizonte', type: 'movie', title: 'O Último Horizonte', year: 2025,
@@ -136,7 +140,7 @@ export const TITLES = [
     free: false,
     synopsis: 'Dois irmãos partem em busca do mapa que o pai deixou e descobrem que o maior tesouro era a própria jornada.',
     cast: ['André Lima', 'Paula Reis'],
-    director: 'Sofia Menezes', qualities: Q.jelly, trailer: TRAILER,
+    director: 'Sofia Menezes', qualities: Q.elephants, trailer: TRAILER,
   },
   {
     id: 'codigo-vermelho', type: 'movie', title: 'Código Vermelho', year: 2024,
@@ -154,7 +158,7 @@ export const TITLES = [
     free: true,
     synopsis: 'Uma correspondência esquecida reacende um amor que o tempo tentou apagar.',
     cast: ['Isabel Duarte', 'Henrique Sá'],
-    director: 'Clara Vaz', qualities: Q.sintel, trailer: TRAILER,
+    director: 'Clara Vaz', qualities: Q.general, trailer: TRAILER,
   },
   {
     id: 'instinto-selvagem', type: 'movie', title: 'Instinto Selvagem', year: 2023,
@@ -163,7 +167,7 @@ export const TITLES = [
     free: false,
     synopsis: 'Presos em uma reserva isolada, um grupo descobre que a maior ameaça não é a natureza.',
     cast: ['Vitor Andrade', 'Larissa Pires'],
-    director: 'Marcos Dias', qualities: Q.jelly, trailer: TRAILER,
+    director: 'Marcos Dias', qualities: Q.elephants, trailer: TRAILER,
   },
 
   // -------- Séries --------
@@ -184,8 +188,8 @@ export const TITLES = [
     free: false,
     synopsis: 'Três gerações de uma família guardiã de um poder antigo precisam decidir o destino de sua cidade.',
     cast: ['Beatriz Alves', 'Rodrigo Farias'],
-    director: 'Joana Freitas', qualities: Q.sintel, trailer: TRAILER,
-    seasons: makeSeasons('Herdeiros da Luz', 2, 6, Q.sintel),
+    director: 'Joana Freitas', qualities: Q.general, trailer: TRAILER,
+    seasons: makeSeasons('Herdeiros da Luz', 2, 6, Q.general),
   },
   {
     id: 'linha-de-comando', type: 'series', title: 'Linha de Comando', year: 2025,
@@ -194,8 +198,8 @@ export const TITLES = [
     free: false, badge: 'Novo',
     synopsis: 'Uma força-tarefa improvável persegue a maior rede criminosa da costa leste.',
     cast: ['Sérgio Nogueira', 'Tânia Melo'],
-    director: 'Caio Rocha', qualities: Q.jelly, trailer: TRAILER,
-    seasons: makeSeasons('Linha de Comando', 2, 10, Q.jelly),
+    director: 'Caio Rocha', qualities: Q.elephants, trailer: TRAILER,
+    seasons: makeSeasons('Linha de Comando', 2, 10, Q.elephants),
   },
   {
     id: 'estacao-orion', type: 'series', title: 'Estação Órion', year: 2022,
@@ -204,8 +208,8 @@ export const TITLES = [
     free: true,
     synopsis: 'A tripulação de uma estação orbital enfrenta o isolamento — e algo mais.',
     cast: ['Pedro Sampaio', 'Helena Braga'],
-    director: 'Vera Lúcia', qualities: Q.oceans, trailer: TRAILER,
-    seasons: makeSeasons('Estação Órion', 2, 7, Q.oceans),
+    director: 'Vera Lúcia', qualities: Q.sintel, trailer: TRAILER,
+    seasons: makeSeasons('Estação Órion', 2, 7, Q.sintel),
   },
 
   // -------- Documentários --------
@@ -215,7 +219,7 @@ export const TITLES = [
     tags: ['documentarios', 'destaque', 'mais-assistidos'],
     free: false,
     synopsis: 'Uma imersão nas profundezas dos oceanos e nas criaturas que nunca viram a luz do sol.',
-    cast: [], director: 'Equipe MEGA Nature', qualities: Q.oceans, trailer: TRAILER,
+    cast: [], director: 'Equipe MEGA Nature', qualities: Q.sintel, trailer: TRAILER,
   },
   {
     id: 'cidades-invisiveis', type: 'documentary', title: 'Cidades Invisíveis', year: 2023,
@@ -223,7 +227,7 @@ export const TITLES = [
     tags: ['documentarios', 'tendencias'],
     free: true,
     synopsis: 'Histórias de metrópoles que crescem mais rápido do que a própria imaginação.',
-    cast: [], director: 'Marta Ribeiro', qualities: Q.jelly, trailer: TRAILER,
+    cast: [], director: 'Marta Ribeiro', qualities: Q.elephants, trailer: TRAILER,
   },
   {
     id: 'mentes-brilhantes', type: 'documentary', title: 'Mentes Brilhantes', year: 2025,
@@ -231,7 +235,7 @@ export const TITLES = [
     tags: ['documentarios', 'lancamentos'],
     free: false,
     synopsis: 'Os cientistas que estão reescrevendo o futuro da humanidade, contados por eles mesmos.',
-    cast: [], director: 'Ana Beatriz Luz', qualities: Q.sintel, trailer: TRAILER,
+    cast: [], director: 'Ana Beatriz Luz', qualities: Q.general, trailer: TRAILER,
   },
 
   // -------- Shows --------
@@ -249,7 +253,7 @@ export const TITLES = [
     tags: ['shows', 'musica'],
     free: true,
     synopsis: 'Sessões acústicas intimistas com artistas que marcaram geração.',
-    cast: [], director: 'Produção MEGA', qualities: Q.jelly, trailer: TRAILER,
+    cast: [], director: 'Produção MEGA', qualities: Q.elephants, trailer: TRAILER,
   },
   {
     id: 'stand-up-sem-filtro', type: 'show', title: 'Stand-up Sem Filtro', year: 2023,
@@ -257,7 +261,7 @@ export const TITLES = [
     tags: ['shows', 'tendencias'],
     free: true,
     synopsis: 'Uma hora de piadas afiadas sobre a vida adulta, o trabalho e o caos do dia a dia.',
-    cast: ['Marcelo Pinto'], director: 'Produção MEGA', qualities: Q.sintel, trailer: TRAILER,
+    cast: ['Marcelo Pinto'], director: 'Produção MEGA', qualities: Q.general, trailer: TRAILER,
   },
 
   // -------- Música --------
@@ -267,7 +271,7 @@ export const TITLES = [
     tags: ['musica', 'destaque'],
     free: true,
     synopsis: 'Uma jornada sonora gravada ao vivo em alto-mar, com orquestra e sons da natureza.',
-    cast: [], director: 'Orquestra MEGA', qualities: Q.oceans, trailer: TRAILER,
+    cast: [], director: 'Orquestra MEGA', qualities: Q.sintel, trailer: TRAILER,
   },
   {
     id: 'batidas-urbanas', type: 'music', title: 'Batidas Urbanas', year: 2025,
@@ -285,7 +289,7 @@ export const TITLES = [
     tags: ['infantil', 'destaque'],
     free: true,
     synopsis: 'Bolinho e seus amigos exploram a floresta dos sonhos e aprendem sobre amizade.',
-    cast: [], director: 'Estúdio MEGA Kids', qualities: Q.jelly, trailer: TRAILER,
+    cast: [], director: 'Estúdio MEGA Kids', qualities: Q.bbb, trailer: TRAILER,
   },
   {
     id: 'turma-do-espaco', type: 'kids', title: 'Turma do Espaço', year: 2023,
@@ -293,7 +297,7 @@ export const TITLES = [
     tags: ['infantil'],
     free: true,
     synopsis: 'Uma turma de crianças astronautas vive aventuras entre planetas coloridos.',
-    cast: [], director: 'Estúdio MEGA Kids', qualities: Q.oceans, trailer: TRAILER,
+    cast: [], director: 'Estúdio MEGA Kids', qualities: Q.bbb, trailer: TRAILER,
   },
 
   // -------- Gospel --------
@@ -303,7 +307,7 @@ export const TITLES = [
     tags: ['gospel', 'musica', 'destaque'],
     free: true,
     synopsis: 'Uma noite de adoração com os maiores nomes da música gospel nacional.',
-    cast: [], director: 'Produção MEGA', qualities: Q.sintel, trailer: TRAILER,
+    cast: [], director: 'Produção MEGA', qualities: Q.general, trailer: TRAILER,
   },
   {
     id: 'caminho-de-fe', type: 'series', title: 'Caminho de Fé', year: 2024,
@@ -323,7 +327,7 @@ export const TITLES = [
     tags: ['noticias', 'lancamentos'],
     free: true,
     synopsis: 'As principais notícias do Brasil e do mundo, com análise e correspondentes internacionais.',
-    cast: [], director: 'Redação MEGA', qualities: Q.jelly, trailer: TRAILER,
+    cast: [], director: 'Redação MEGA', qualities: Q.elephants, trailer: TRAILER,
   },
   {
     id: 'giro-tecnologico', type: 'news', title: 'Giro Tecnológico', year: 2025,
@@ -331,7 +335,7 @@ export const TITLES = [
     tags: ['noticias', 'tendencias'],
     free: true,
     synopsis: 'O que há de novo em tecnologia, IA e ciência, explicado de forma simples.',
-    cast: [], director: 'Redação MEGA', qualities: Q.sintel, trailer: TRAILER,
+    cast: [], director: 'Redação MEGA', qualities: Q.general, trailer: TRAILER,
   },
 
   // -------- Esportes --------
@@ -349,7 +353,7 @@ export const TITLES = [
     tags: ['esportes', 'lancamentos'],
     free: false,
     synopsis: 'Cobertura completa da temporada, com câmeras a bordo e telemetria em tempo real.',
-    cast: [], director: 'MEGA Esportes', qualities: Q.oceans, trailer: TRAILER,
+    cast: [], director: 'MEGA Esportes', qualities: Q.sintel, trailer: TRAILER,
   },
   {
     id: 'basquete-finais', type: 'sports', title: 'Finais do Basquete', year: 2024,
@@ -357,7 +361,7 @@ export const TITLES = [
     tags: ['esportes'],
     free: true,
     synopsis: 'A decisão do título em uma série melhor de sete eletrizante.',
-    cast: [], director: 'MEGA Esportes', qualities: Q.jelly, trailer: TRAILER,
+    cast: [], director: 'MEGA Esportes', qualities: Q.elephants, trailer: TRAILER,
   },
 ]
 
@@ -463,7 +467,7 @@ export function registerPublished(videos = []) {
     tags: ['novidades', ...(v.tags || [])],
     cast: v.cast || [],
     duration: v.duration || 0,
-    qualities: v.qualities?.length ? v.qualities : Q.oceans,
+    qualities: v.qualities?.length ? v.qualities : Q.sintel,
     trailer: v.trailer || TRAILER,
   }))
   return publishedTitles
