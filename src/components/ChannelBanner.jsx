@@ -8,9 +8,9 @@ export default function ChannelBanner() {
         src={banner}
         alt="MT TUB — vídeos que edificam e inspiram"
         loading="eager"
-        className="h-[30vh] max-h-[380px] min-h-[190px] w-full object-cover"
+        className="h-[16vh] min-h-[104px] max-h-[150px] w-full object-cover object-center sm:h-[20vh] sm:min-h-[140px] sm:max-h-[210px] lg:h-[24vh] lg:max-h-[300px]"
       />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-ink-950 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-ink-950 to-transparent" />
     </section>
   )
 }
